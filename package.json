@@ -8,7 +8,7 @@
       , "stylus": "*"
       , "coffee-script": "*"
       , "source-map-support": "*"
-      , "express-livereload": "*"
+      , "livereload": "git://github.com/mnmly/node-livereload.git"
     }
   , "scripts": {
       "start": "server.js"
