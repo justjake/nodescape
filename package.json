@@ -1,0 +1,20 @@
+{
+    "name": "node-scape"
+  , "version": "0.0.1"
+  , "dependencies": {
+        "express": "*"
+      , "connect-assets": "2.1.x"
+      , "jade": "*"
+      , "stylus": "*"
+      , "coffee-script": "*"
+      , "source-map-support": "*"
+      , "express-livereload": "*"
+    }
+  , "scripts": {
+      "start": "server.js"
+    }
+  , "engines": {
+        "node": "0.10.4"
+      , "npm": "1.1.x"
+    }
+}
