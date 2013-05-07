@@ -15,6 +15,53 @@ FAR = 10000
 ORANGERED = 0x862104
 ORANGE    = 0xe89206
 
+
+K = 1000
+
+
+#### Class library.
+# We may want to move classes into thier own files eventually
+
+# manage add/removing nodes from the graph. In-memory store
+class Graph
+    constructor: (@scene)  ->
+        @nodes = {}
+        @edges = {}
+
+    # Create/Update/Delete based on a JSON node data structure
+    # node_data is a map[int]Object as defined in format.js
+    updateNodes: (node_data) ->
+        for id, data of node_data
+            if @nodes[id]?
+                if data is null
+                    # sent id: null, delete node with id
+                    @deleteNode(id)
+                    break
+                # update existing node
+                @nodes[id].name =       data.name if data.name?
+                @nodes[id].classes =    data.classes if data.classes?
+                @nodes[id].properties = data.properties if data.properties?
+                @nodes[id].update() # signal ending update transaction
+            else
+                # create new node
+                # Node.NewFromData will return undefined if data does not have the required fields
+                @addNode = Node.NewFromData(data)
+
+
+    addNode: (node) ->
+        @nodes[node.id] = node
+        @scene.add(node.mesh)
+
+    onRender: ->
+        scene = @scene
+        # render each node
+        for _, node in @nodes
+            node.onRender(scene)
+
+        for _, edge in @edges
+            edge.onRender(scene)
+
+
 class MouseCamera
     transform = .05
     offset = 200
@@ -36,13 +83,11 @@ class MouseCamera
     mouseMove: (evt) ->
         @mouseX = evt.clientX - @windowHalfX
         @mouseY = evt.clientY - @windowHalfY
-        console.log("mm", this)
 
     onRender: (scene) ->
         @camera.position.x += (@mouseX - camera.position.x) * transform
         @camera.position.y += (- @mouseY + offset - camera.position.y) * transform
         @camera.lookAt(scene.position)
-
 
 class Node
     # these are local variables, and are not accessable outside
@@ -60,14 +105,26 @@ class Node
     @Instances = {}
 
     # id, classes, properties auto-saved to those object properties
-    constructor: (@id, @classes, @properties) ->
+    constructor: (@id, @name, @classes, @properties) ->
         if ! @id?
             throw "All nodes must have an ID"
 
         # this.constructor is the class accessor
         @constructor.Instances[@id] = this
         @mesh = new T.Mesh(baseGeometry, baseMaterial)
+        @mesh.rotation.x = 100
 
+    onRender: (scene) ->
+        if @properties.activity
+            # TODO: make this work
+            @mesh.rotation.y += @properties.activity / K
+
+    
+
+##### Utility functions
+# debounce calls returns a function that calls fn at most once 
+# every `wait` miliseconds.
+# if immediate is true, fn will be run on the first call.
 debounce = (fn, wait, immediate) ->
     timeout = null
     return ->
@@ -75,14 +132,14 @@ debounce = (fn, wait, immediate) ->
         args = arguments
         later = ->
             timeout = null
-            if not immediate
-                fn.apply ctx, args
+            fn.apply(ctx, args) unless immediate
         callNow = immediate and not timeout
         window.clearTimeout timeout
         timeout = window.setTimeout later, wait
         if callNow
             func.apply ctx, args
 
+#### Element constructors
 registartion = (width,  mat) ->
     t = new T.Vector3(width / 2, 0, 0)
     b = new T.Vector3(width / 2, width, 0)
@@ -107,7 +164,6 @@ reg_field = (min, max, spacing, size, color) ->
             reg.position.y = y
             reg.position.x = x
             # reg.position.z = Math.random() * spacing
-
     return group
 
 
@@ -126,17 +182,16 @@ size = 500
 spacing = 80
 reg_red = reg_field(-1 * size, size, spacing, 10, ORANGERED)
 reg_oj = reg_field(-1 * size, size, spacing * 2, 10, ORANGE)
-
-node = new Node('Example', [], {})
-cube = node.mesh
+graph = new Graph(scene)
+graph.addNode(new Node(1, 'Example', [], {activity: 100}))
+graph.addNode(new Node(2, 'Example 2', [], {activity: 2000}))
 light = new T.PointLight(0xFFFFFF)
 
 # initial setup
-for obj in [cube, light, camera, reg_red, reg_oj]
+for obj in [light, camera, reg_red, reg_oj]
     scene.add(obj)
 
 camera.position.z = 500
-cube.rotation.z = 100
 light.position.x = 10
 light.position.y = 50
 light.position.z = 130
@@ -163,10 +218,11 @@ document.addEventListener("mousemove", ((evt) ->  mouse_cam.mouseMove(evt)), fal
 render = ->
     requestAnimationFrame(render)
 
-    cube.rotation.y += 0.1
-
     # move camera about
     mouse_cam.onRender(scene)
+
+    # render graph
+    graph.onRender(scene)
 
     # pull the trigger
     renderer.render(scene, camera)
