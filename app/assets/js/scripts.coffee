@@ -250,7 +250,7 @@ $container.append renderer.domElement
 #### Window Resize Events
 # ...
 on_resize = ->
-    renderer.setSize window.innerWidth, window.innerHeight
+    renderer.setSize window.innerWidth - 10, window.innerHeight - 10
     mouse_cam.onResize()
 
 # manually trigger...
