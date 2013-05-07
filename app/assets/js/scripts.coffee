@@ -18,15 +18,36 @@ ORANGE    = 0xe89206
 
 K = 1000
 
+# positive/negative multiplier
+pos = (n) ->
+    return 1  if n > 0
+    return -1 if n < 0
+    return 0  if n == 0
+
+# calculate animation deltas
+animateTo = (target, current, rate) ->
+    if rate >= Math.abs(target - current)
+        rate = Math.abs((target - current) / 2)
+    return pos(target - current) * rate
+
 
 #### Class library.
 # We may want to move classes into thier own files eventually
 
-# manage add/removing nodes from the graph. In-memory store
+# manage add/removing nodes from the graph. HASHMAP - the class
 class Graph
+
+    RADIUS = 200
+    MOVEMENT_RATE = 3
+    circle = (theta, r) ->
+        return [r * Math.cos(theta), r * Math.sin(theta)]
+
+
     constructor: (@scene)  ->
         @nodes = {}
         @edges = {}
+        @_cnodes = 0
+        @_cedges = 0
 
     # Create/Update/Delete based on a JSON node data structure
     # node_data is a map[int]Object as defined in format.js
@@ -45,20 +66,36 @@ class Graph
             else
                 # create new node
                 # Node.NewFromData will return undefined if data does not have the required fields
-                @addNode = Node.NewFromData(data)
+                @addNode(Node.NewFromData(data))
 
 
     addNode: (node) ->
         @nodes[node.id] = node
         @scene.add(node.mesh)
+        @_cnodes += 1
+
+    deleteNode: (id) ->
+        n = @nodes[id]
+        @scene.remove(node.mesh)
+        @nodes[id] = undefined
+        @_cnodes -= 1
 
     onRender: ->
         scene = @scene
         # render each node
-        for _, node in @nodes
+        idx = 0
+        # circle gets bigger based on how many nodes we have
+        r = @_cnodes * Node.SIZE / 2 + Node.SIZE
+        for _, node of @nodes
             node.onRender(scene)
+            # lay out in circle
+            [x, y] = circle(idx / (@_cnodes) * 2 * Math.PI, r)
+            # animate into position
+            node.mesh.position.x += animateTo(x, node.mesh.position.x, MOVEMENT_RATE)
+            node.mesh.position.y += animateTo(y, node.mesh.position.y, MOVEMENT_RATE)
+            idx += 1
 
-        for _, edge in @edges
+        for _, edge of @edges
             edge.onRender(scene)
 
 
@@ -99,26 +136,30 @@ class Node
         emissive: ORANGE
         refractionRatio: 0
 
-    # a static class property
-    # this is a bad idea, and should be handled elsewhere
-    # currently just an illustrative example
-    @Instances = {}
+    @SIZE = 40 #TODO: make this dynamic vs baseGeometry
 
+    # FACTORY1111!!!!!
+    @NewFromData = (data) ->
+        return new Node(data.id, data.name, data.classes, data.properties)
+
+    
     # id, classes, properties auto-saved to those object properties
     constructor: (@id, @name, @classes, @properties) ->
         if ! @id?
             throw "All nodes must have an ID"
 
-        # this.constructor is the class accessor
-        @constructor.Instances[@id] = this
         @mesh = new T.Mesh(baseGeometry, baseMaterial)
         @mesh.rotation.x = 100
 
     onRender: (scene) ->
-        if @properties.activity
-            # TODO: make this work
+        if @properties.activity?
             @mesh.rotation.y += @properties.activity / K
 
+class Successor
+    constructor: (int) ->
+        @val = int
+    next: ->
+        @val += 1
     
 
 ##### Utility functions
@@ -138,6 +179,8 @@ debounce = (fn, wait, immediate) ->
         timeout = window.setTimeout later, wait
         if callNow
             func.apply ctx, args
+
+
 
 #### Element constructors
 registartion = (width,  mat) ->
@@ -167,6 +210,7 @@ reg_field = (min, max, spacing, size, color) ->
     return group
 
 
+ID = new Successor(0)
 
 # control creation
 $container = $('#container')
@@ -182,9 +226,11 @@ size = 500
 spacing = 80
 reg_red = reg_field(-1 * size, size, spacing, 10, ORANGERED)
 reg_oj = reg_field(-1 * size, size, spacing * 2, 10, ORANGE)
-graph = new Graph(scene)
-graph.addNode(new Node(1, 'Example', [], {activity: 100}))
-graph.addNode(new Node(2, 'Example 2', [], {activity: 2000}))
+window.graph = new Graph(scene)
+
+node_count = Math.floor(Math.random() * 10)
+for i in [0..node_count]
+    graph.addNode(new Node(ID.next(), 'Example', [], {activity: 200 * Math.random()}))
 light = new T.PointLight(0xFFFFFF)
 
 # initial setup
