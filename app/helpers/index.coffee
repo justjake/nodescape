@@ -1,4 +1,5 @@
 fs = require 'fs'
+livereload = require "livereload"
 
 # Recursively require a folder’s files
 exports.autoload = autoload = (dir, app) ->
@@ -31,3 +32,23 @@ String::classify = (str) ->
     classified.push word.capitalize()
 
   classified.join('')
+
+exports.livereload = (app, dirs...) -> 
+  config =
+      port: 35729
+      exts: [
+          "js"
+          "coffee"
+          "jade"
+          "styl"
+      ]
+      watchDir: dirs[0]
+
+  if app.settings.env is 'production'
+      app.locals.LRScript = ""
+  else
+      app.locals.LRScript = "<script>document.write('<script src=\"http://' + (location.host || 'localhost').split(':')[0] + ':#{config.port or 35729}/livereload.js\"></' + 'script>')</script>"
+      server = livereload.createServer(config)
+      for dir in dirs
+          console.log "watching #{dir}"
+          server.watch(dir)

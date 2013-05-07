@@ -1,17 +1,23 @@
 # Modules
 express = require 'express'
 http = require 'http'
-livereload = require 'express-livereload'
 app = express()
 
 # Boot setup
 require("#{__dirname}/../config/boot")(app)
+
 
 # Configuration
 app.configure ->
   port = process.env.PORT || 3000
   if process.argv.indexOf('-p') >= 0
     port = process.argv[process.argv.indexOf('-p') + 1]
+
+  # live reload
+  app.helpers.livereload(app, 
+      "#{__dirname}/assets", 
+      "#{__dirname}/views",
+      "#{__dirname}/../public")
 
   app.set 'port', port
   app.set 'views', "#{__dirname}/views"
@@ -26,15 +32,6 @@ app.configure ->
 
 app.configure 'development', ->
   app.use express.errorHandler()
-  livereload app, {
-      exts: [
-          "js"
-          "coffee"
-          "jade"
-          "styl"
-      ]
-      watchDir: "#{__dirname}/assets"
-  }
 
 # Routes
 require("#{__dirname}/routes")(app)
