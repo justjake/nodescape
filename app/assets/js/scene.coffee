@@ -9,11 +9,11 @@ ID = new Scape.Successor(0)
 $container = $('#container')
 renderer = new THREE.WebGLRenderer()
 mouse_cam = new Scape.MouseCamera(VIEW_ANGLE, 700)
-camera = mouse_cam.camera
+camera = window.camera = mouse_cam.camera
 scene = new THREE.Scene()
 
 # create non-graph scene objects
-size = 500
+size = 900
 spacing = 80
 reg_red = Scape.reg_field(-1 * size, size, spacing, 10, ORANGERED)
 reg_oj = Scape.reg_field(-1 * size, size, spacing * 2, 10, ORANGE)
@@ -42,8 +42,70 @@ renderer.setSize WIDTH, HEIGHT
 $container.append(renderer.domElement)
 
 
+#### Mouse wheel zoom
+
+# create a normalized mouse-wheel-scroll event function for future
+# binding
+handleWheelEvent = (handler) ->
+    return (event) ->
+        delta = 0
+        # do we really need to support so many browsers?
+        if !event # IE
+            event = window.event
+        if event.wheelDelta? # IE/opera
+            delta = event.wheelDelta / 120
+        else if event.detail # mozilla
+            delta = -1 * event.detail / 3
+
+        # call user CB when wheel is moving
+        if delta != 0
+            handler(delta)
+
+        if event.preventDefault
+            event.preventDefault()
+        event.returnValue = false
+
+
+# high code right here
+
+        # scroll_speed = 0
+        # scroll_delta = 0
+        # 
+        # always_accelerate_in_scroll_speed_direction = ->
+        #     camera.position.z += scroll_speed
+        # 
+        # reset_scroll_delta =  debounce((->
+        #     scroll_delta = 0), 12, false)
+        # 
+        # scroll_speed_fn = ->
+        #     console.log('scroll speed window mover', scroll_speed, scroll_delta)
+        #     # accell if scroll_delta
+        #     scroll_speed += scroll_delta * 4
+        # 
+        #     # deaccell
+        #     scroll_speed += (-1 * pos(scroll_speed)) if scroll_speed != 0
+        #     scroll_delta += (-1 * pos(scroll_speed)) if scroll_speed != 0
+        # 
+        # 
+        # scroll_camera_handler = handleWheelEvent (delta) ->
+        #     console.log('scroll delta')
+        #     scroll_delta = pos(delta)
+        #     # debounce reset scroll speed
+        #     reset_scroll_delta()
+
+# start derping this system of equations
+# window.setInterval(scroll_speed_fn, 1)
+# window.setInterval(always_accelerate_in_scroll_speed_direction, 1)
+
+scroll_camera_handler = handleWheelEvent (delta) ->
+    camera.position.z += pos(delta) * 35
+    if Math.abs(camera.position.z) >= MAX_ZOOM
+        camera.position.z = MAX_ZOOM * pos(camera.position.z)
 
 #### Event Handlers
+
+# window resize - reformat renderer to correct size, and scale camera
+# accordingly while looking via the mouse
 on_resize = ->
     renderer.setSize window.innerWidth - 10, window.innerHeight - 10
     mouse_cam.onResize()
@@ -54,6 +116,7 @@ on_resize()
 # bind event handlers
 window.addEventListener("resize", debounce(on_resize, 100), false)
 document.addEventListener("mousemove", ((evt) ->  mouse_cam.mouseMove(evt)), false)
+window.addEventListener("mousewheel", scroll_camera_handler, false)
 
 
 #### Rendering loop

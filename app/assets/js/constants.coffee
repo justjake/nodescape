@@ -13,6 +13,10 @@ exports.ASPECT = exports.WIDTH / exports.HEIGHT
 exports.NEAR = 0.1
 exports.FAR = 10000
 
+# global camera control
+exports.MAX_ZOOM = 1350
+exports.camera = "derp"
+
 exports.ORANGERED = 0x862104
 exports.ORANGE    = 0xe89206
 

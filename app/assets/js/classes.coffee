@@ -128,6 +128,18 @@ class Node
         if @properties.activity?
             @mesh.rotation.y += @properties.activity / K
 
+class Edge
+    constructor: (@id, @to, @from, @classes, @properties) ->
+        if ! @id?
+            throw "All edges must have an ID"
+        @mesh = null
+
+    onRender: (scene) ->
+
+
+  
+
+
 # returns bigger numbers.
 class Successor
     constructor: (int) ->
