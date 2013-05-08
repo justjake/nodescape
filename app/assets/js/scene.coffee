@@ -97,10 +97,22 @@ handleWheelEvent = (handler) ->
 # window.setInterval(scroll_speed_fn, 1)
 # window.setInterval(always_accelerate_in_scroll_speed_direction, 1)
 
+prev_distance = false
 scroll_camera_handler = handleWheelEvent (delta) ->
-    camera.position.z += pos(delta) * 35
+    camera.position.z += -1 * pos(delta) * 35
+    prev_distance = false
     if Math.abs(camera.position.z) >= MAX_ZOOM
         camera.position.z = MAX_ZOOM * pos(camera.position.z)
+
+on_mouse_down = (evt) ->
+    if evt.button == 1 # middle mouse button
+        if prev_distance != false
+            camera.position.z = prev_distance
+            prev_distance = false
+        else
+            prev_distance =  camera.position.z
+            camera.position.z = 25 # zoom to a dramatic angle
+
 
 #### Event Handlers
 
@@ -117,6 +129,7 @@ on_resize()
 window.addEventListener("resize", debounce(on_resize, 100), false)
 document.addEventListener("mousemove", ((evt) ->  mouse_cam.mouseMove(evt)), false)
 window.addEventListener("mousewheel", scroll_camera_handler, false)
+document.addEventListener("mousedown", on_mouse_down, false)
 
 
 #### Rendering loop
