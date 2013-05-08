@@ -2,4 +2,11 @@ extends layout
 
 block content
     script(src="/three.js")
+    
+
     div#container
+
+block scripts
+    != js('constants.js')
+    != js('classes.js')
+    != js('scene.js')
