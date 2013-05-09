@@ -255,7 +255,7 @@ class MouseCamera
         @camera.lookAt(scene.position)
 
     onMouseScroll: (delta) ->
-        @camera.position.z += 1 * pos(delta) * MOUSE_SCROLL_DISTANCE
+        @camera.position.z += -1 * pos(delta) * MOUSE_SCROLL_DISTANCE
         @prevScrollDistance = false
         if Math.abs(@camera.position.z) >= @maxDistance
             @camera.position.z = @maxDistance * pos(@camera.position.z)

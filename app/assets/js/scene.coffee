@@ -11,7 +11,7 @@ scene = new THREE.Scene()
 renderer = new THREE.WebGLRenderer
     alpha: false
     clearColor: 0x110000
-    antialias: true
+    antialias: false
     clearApha: 1
 renderer.autoClear = false
 
@@ -92,6 +92,7 @@ on_resize()
 window.addEventListener("resize", debounce(on_resize, 100), false)
 document.addEventListener("mousemove", ((evt) ->  mouse_cam.mouseMove(evt)), false)
 window.addEventListener("mousewheel", mouse_cam.boundMouseScroll, false)
+window.addEventListener("DOMMouseScroll", mouse_cam.boundMouseScroll, false)
 document.addEventListener("mousedown", ((evt) -> mouse_cam.onMouseDown(evt)), false)
 
 animate = ->
