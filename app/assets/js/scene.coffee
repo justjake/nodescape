@@ -22,17 +22,17 @@ camera = window.camera = mouse_cam.camera
 # create node graph
 window.graph = new Scape.Graph(scene)
 # and add 1-10 nodes to it
-# node_count = randomInRange(6, 20)
-# edge_count = randomInRange(node_count, node_count * 2)
-# for i in [0..node_count]
-#     graph.addNode(new Scape.Node(i, 'Example', [], {activity: 200 * Math.random()}))
-# # create some edges!
-# for i in [0..edge_count]
-#     to = graph.nodes[ randomInRange(0, node_count) ]
-#     from = to
-#     # choose different end point
-#     from = graph.nodes[ randomInRange(0, node_count) ] until from != to
-#     graph.addEdge(new Scape.Edge(i, to, from, [], {}))
+node_count = randomInRange(6, 20)
+edge_count = randomInRange(node_count, node_count * 2)
+for i in [0..node_count]
+    graph.addNode(new Scape.Node(i, 'Example', [], {activity: 200 * Math.random()}))
+# create some edges!
+for i in [0..edge_count]
+    to = graph.nodes[ randomInRange(0, node_count) ]
+    from = to
+    # choose different end point
+    from = graph.nodes[ randomInRange(0, node_count) ] until from != to
+    graph.addEdge(new Scape.Edge(i, to, from, [], {}))
 
 # create non-graph scene objects
 size = 900

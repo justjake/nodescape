@@ -146,9 +146,10 @@ class Node
 # TODO: allow for different line types
 class Edge
     baseMaterial = new T.LineBasicMaterial(
-        color: CYAN
+        color: 0xffffff
         linewidth: LINEWIDTH
-        linecapp: "round"
+        linecap: "round"
+        vertexColors: T.VertexColors
     )
 
     # FACTORY1111!!!!!
@@ -167,6 +168,70 @@ class Edge
         edge.data =    data.data if data.data?
         edge.update() # signal ending update transaction
 
+    # actually draw a line
+    # see http://workshop.chromeexperiments.com/projects/armsglobe/js/visualize_lines.js
+    @DrawLine = (start, end, rotation) ->
+      start = start.clone()
+      end = end.clone()
+
+      # length between start and end points
+      distance = start.clone().sub(end).length()
+      # how high we want to arc the line
+      height = 0.2 * distance
+
+      # midpoint
+      mid = start.clone().lerp(end, 0.5)
+      mid.z = height
+
+      # the normal (?) i should read a book
+      normal = (new T.Vector3()).subVectors(start, end)
+      normal.normalize()
+
+      #         The curve looks like this:
+      #         
+      #         midStartAnchor---- mid ----- midEndAnchor
+      #         /                                       \
+      #        /                                         \
+      #       /                                           \
+      #   start/anchor                                 end/anchor
+      #           splineCurveA              splineCurveB
+      # 
+
+      distanceHalf = distance / 2
+
+      startAnchor = start
+      midStartAnchor = mid.clone().add(normal.clone().multiplyScalar(distanceHalf))
+      midEndAnchor = mid.clone().add(normal.clone().multiplyScalar(-1 * distanceHalf))
+      endAnchor = end
+
+      # make bezier curve
+      splineA = new T.CubicBezierCurve3 start, startAnchor, midStartAnchor, mid
+      splineB = new T.CubicBezierCurve3 mid, midEndAnchor, endAnchor, end
+
+      # number of points desired, per side
+      vertexCount = Math.floor(distance * 0.02 + 6) * 2
+     
+      # collect points
+      points = splineA.getPoints(vertexCount)
+      points = points[0...-1] # remove last point because it will be duplicated
+      points = points.concat(splineB.getPoints(vertexCount))
+
+      # create colors
+      i = 0
+      len = points.length
+      colors = []
+      for v in points
+        colors[i] = new T.Color(0xffffff)
+        colors[i].setHSL((Math.abs(0.5 - i/len)), 1.0, 0.5)
+        i += 1
+
+      # create geometry
+      geo = new T.Geometry()
+      geo.vertices = points
+      geo.colors = colors
+      geo.verticesNeedUpdate = true
+      return geo
+
     constructor: (@id, @to, @from, @classes, @data) ->
         if ! @id?
             throw "All edges must have an ID"
@@ -176,21 +241,20 @@ class Edge
             if node.mesh is undefined
                 throw "All nodes must be fully initialized"
             
-        @start = new T.Vector3(0,0,0)
-        @start.copy(@from.mesh.position)
-        @end =  new T.Vector3(0,0,0)
-        @end.copy(@to.mesh.position)
-        geo = new T.Geometry()
-        geo.dynamic = true
-        geo.vertices.push(@start, @end)
-        @mesh = new T.Line(geo, baseMaterial, T.LineStrip)
+        @start = @from.mesh.position.clone()
+        @end =  @to.mesh.position.clone()
+        geo = @constructor.DrawLine(@start, @end)
+        @mesh = new T.Line(geo, baseMaterial)
 
-    onRender: ->
+    onRender: (scene) ->
         # TODO
         # move verticies
+        scene.remove(@mesh)
         @end.copy(@to.mesh.position)
         @start.copy(@from.mesh.position)
-        @mesh.geometry.verticesNeedUpdate = true
+        geo = @constructor.DrawLine(@start, @end)
+        @mesh = new T.Line(geo, baseMaterial)
+        scene.add(@mesh)
 
 
     update: ->
