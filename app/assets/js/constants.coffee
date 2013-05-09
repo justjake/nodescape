@@ -8,17 +8,27 @@ exports = {}
 exports.WIDTH =  window.innerWidth
 exports.HEIGHT = window.innerHeight
 
+# global camera control
+exports.MAX_ZOOM = 1700
+exports.SNAP_DISTANCE = 25
+exports.camera = "derp"
+
+# camera related stuff, don't change
 exports.VIEW_ANGLE = 45
 exports.ASPECT = exports.WIDTH / exports.HEIGHT
 exports.NEAR = 0.1
 exports.FAR = 10000
 
-# global camera control
-exports.MAX_ZOOM = 1350
-exports.camera = "derp"
-
+# colors
 exports.ORANGERED = 0x862104
 exports.ORANGE    = 0xe89206
+exports.CYAN      = 0x00ffff
+
+# text setup
+exports.TEXT_SIZE = 7
+
+# edge setup
+exports.LINEWIDTH = 2
 
 exports.K = 1000
 
@@ -51,6 +61,9 @@ exports.animateTo = (target, current, rate) ->
     if rate >= Math.abs(target - current)
         rate = Math.abs((target - current) / 2)
     return pos(target - current) * rate
+
+exports.randomInRange = (min, max) ->
+    min + Math.floor(Math.random() * (max - min + 1))
 
 # copies all properties of obj onto window
 exportAll = (obj) ->

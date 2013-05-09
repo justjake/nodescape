@@ -24,7 +24,7 @@ var data = {
          * classes is the same
          */
         // create
-        5334: {from: 1, to: 5, classes: ["http", "suspicious"]},
+        5334: {from: 1, to: 5, classes: ["http", "suspicious"], data: {volume: "333"}},
         // update
         12223: {classes: ["port-scan"]},
         // delete - string with termination reason, or null to prune quickly
