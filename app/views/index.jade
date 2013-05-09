@@ -7,6 +7,20 @@ block content
     div#container
 
 block scripts
+    // 3js example scripts
+    script(src="/threejs/shaders/ConvolutionShader.js")
+    script(src="/threejs/shaders/CopyShader.js")
+    script(src="/threejs/shaders/FXAAShader.js")
+
+    script(src="/threejs/postprocessing/EffectComposer.js")
+    script(src="/threejs/postprocessing/MaskPass.js")
+    script(src="/threejs/postprocessing/RenderPass.js")
+    script(src="/threejs/postprocessing/ShaderPass.js")
+    script(src="/threejs/postprocessing/BloomPass.js")
+
+    script(src="/fonts/droid_sans_regular.typeface.js")
+
+    // our scripts, rendered from coffeescript
     != js('constants.js')
     != js('classes.js')
     != js('scene.js')
