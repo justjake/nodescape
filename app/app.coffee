@@ -1,7 +1,13 @@
 # Modules
 express = require 'express'
 http = require 'http'
+
+
+# create app base
 app = express()
+server = http.createServer(app)
+io = app.io = (require 'socket.io').listen(server)
+
 
 # Boot setup
 require("#{__dirname}/../config/boot")(app)
@@ -32,10 +38,11 @@ app.configure ->
 
 app.configure 'development', ->
   app.use express.errorHandler()
+  io.set 'loglevel', 10
 
 # Routes
 require("#{__dirname}/routes")(app)
 
 # Server
-http.createServer(app).listen app.get('port'), ->
+server.listen app.get('port'), ->
   console.log "Express server listening on port #{app.get 'port'} in #{app.settings.env} mode"

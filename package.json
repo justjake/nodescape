@@ -9,6 +9,7 @@
       , "coffee-script": "*"
       , "source-map-support": "*"
       , "livereload": "git://github.com/mnmly/node-livereload.git"
+      , "socket.io": "0.9.x"
     }
   , "scripts": {
       "start": "server.js"

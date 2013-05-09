@@ -32,9 +32,9 @@ class Graph
     _updateElements: (store, datas, updater, creator) ->
         for id, data of datas
             if store[id]?
-                if typeof data isnt "object"
+                if data == null or typeof data isnt "object"
                     # sent id: null or id: reason_string, delete element with id
-                    @_deleteFrom(store, id)
+                    @_delFrom(store, id)
                     break
                 # update existing node
                 updater(store[id], data, this)
@@ -322,8 +322,6 @@ reg_field = (min, max, spacing, size, color, txtify) ->
                         group.add(txt)
                         txt.position.x = x + size
                         txt.position.y = y - (TEXT_SIZE / 1.5)
-                        console.log('txt timeout fired')
-                        group.getDescendants([txt])
                     # window.setTimeout(generate_text, y * 100 + x * 10)
                     generate_text()
         
