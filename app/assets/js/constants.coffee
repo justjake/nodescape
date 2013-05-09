@@ -24,11 +24,14 @@ exports.ORANGERED = 0x862104
 exports.ORANGE    = 0xe89206
 exports.CYAN      = 0x00ffff
 
+exports.LINE_COLOR = exports.ORANGE
+exports.LINE_MIDPOINT = 0.5 # changing animates line coloration
+
 # text setup
 exports.TEXT_SIZE = 7
 
 # edge setup
-exports.LINEWIDTH = 2
+exports.LINEWIDTH = 1
 
 exports.K = 1000
 
@@ -71,3 +74,31 @@ exportAll = (obj) ->
         window[k] = v
 
 exportAll(exports)
+
+forwards = true
+change_midpoint = ->
+  range = 0.2
+  mid   = 0.5
+  min = mid - range
+  max = mid + range
+  STEP = 0.03
+  mp = window.LINE_MIDPOINT
+  mp += STEP if forwards
+  mp -= STEP if not forwards
+
+  if mp > max
+    mp = max
+    forwards = false
+
+  if mp < min
+    mp = min
+    forwards = true
+
+  window.LINE_MIDPOINT = mp
+
+window.animateLines = ->
+  window.LINE_MIDPOINT_CHANGE = setInterval(change_midpoint, 40)
+
+window.dontAnimateLines = ->
+  clearInterval window.LINE_MIDPOINT_CHANGE
+  window.LINE_MIDPOINT = 0.5

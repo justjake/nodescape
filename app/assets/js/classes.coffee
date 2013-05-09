@@ -3,6 +3,18 @@
 #### Class library.
 # We may want to move classes into thier own files eventually
 
+# Gaussian function
+# a = height of curve
+# b = curve position on X axis
+# c = width of standard deviation
+# TODO: oops this doesn't work the way i expect
+window.gaussian = gaussian = (a, b, c) -> (x) ->
+  a * Math.pow(Math.E, -1 * Math.pow(x - b, 2) / (2 * c*c))
+
+# returns a height from 0 to 1 for x from 0..length
+
+
+
 # manage add/removing nodes from the graph. HASHMAP - the class
 
 class Graph
@@ -170,6 +182,30 @@ class Edge
 
     # actually draw a line
     # see http://workshop.chromeexperiments.com/projects/armsglobe/js/visualize_lines.js
+    @DLG = (start, end) ->
+      start = start.clone()
+      end = end.clone()
+
+      POINTS_WANTED = 50 # over the whole curve
+
+      distance = start.clone().sub(end).length()
+      height = 0.3 * distance
+      width = distance / 2 # where the STD dev is
+
+      color = new T.Color(ORANGE)
+      hsl = color.getHSL()
+      geo = new T.Geometry()
+      f = window.latest_f = gaussian(height, 0.5, Math.sqrt(0.05))
+      for i in [0..POINTS_WANTED]
+        p = start.clone().lerp(end, i / POINTS_WANTED)
+        p.z = f(i / POINTS_WANTED)
+        c = new T.Color(0xffffff)
+        c.setHSL(hsl.h, hsl.s, (p.z / height) / 2)
+        geo.vertices.push(p)
+        geo.colors.push(c)
+
+      return geo
+
     @DrawLine = (start, end, rotation) ->
       start = start.clone()
       end = end.clone()
@@ -220,9 +256,18 @@ class Edge
       i = 0
       len = points.length
       colors = []
+      color = new T.Color(window.LINE_COLOR)
+      hsl = color.getHSL()
+      # gaussian color distribution along the points
+      # shrinking values of C (the Math.sqrt para) gives more contrast
+      # LINE_MIDPOINT is 0.5 usually, but can be adjusted to
+      # animate all lnes at the same time!
+      f = window.latest_f = gaussian(0.5, window.LINE_MIDPOINT, Math.sqrt(0.02))
       for v in points
-        colors[i] = new T.Color(0xffffff)
-        colors[i].setHSL((Math.abs(0.5 - i/len)), 1.0, 0.5)
+        colors[i] = new T.Color(0xFFFFFF)
+        # color is half of gaussian because the bloom filter
+        # seems to double lightness values!
+        colors[i].setHSL(hsl.h, hsl.s, f(i/len)) 
         i += 1
 
       # create geometry
