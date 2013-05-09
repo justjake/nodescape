@@ -268,6 +268,10 @@ class Edge
         # color is half of gaussian because the bloom filter
         # seems to double lightness values!
         colors[i].setHSL(hsl.h, hsl.s, f(i/len)) 
+        # derp the point a bit, sometimes
+        if Math.random() > (1 - window.CRAZYTUDE)
+          v.z += Math.random() * v.z / 4 
+          colors[i].offsetHSL(Math.random() / 2, 0, 0.4)
         i += 1
 
       # create geometry

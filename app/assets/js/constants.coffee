@@ -8,6 +8,11 @@ exports = {}
 exports.WIDTH =  window.innerWidth
 exports.HEIGHT = window.innerHeight
 
+# THE BEST CONSTANT IN THE WORLD RIGHT HERE
+###########################################
+exports.CRAZYTUDE = 0.002
+###########################################
+
 # global camera control
 exports.MAX_ZOOM = 1700
 exports.SNAP_DISTANCE = 25
@@ -23,8 +28,9 @@ exports.FAR = 10000
 exports.ORANGERED = 0x862104
 exports.ORANGE    = 0xe89206
 exports.CYAN      = 0x00ffff
+exports.COOL      = 30617 # i forget the hex !
 
-exports.LINE_COLOR = exports.ORANGE
+exports.LINE_COLOR = exports.COOL
 exports.LINE_MIDPOINT = 0.5 # changing animates line coloration
 
 # text setup
@@ -75,30 +81,31 @@ exportAll = (obj) ->
 
 exportAll(exports)
 
-forwards = true
-change_midpoint = ->
-  range = 0.2
-  mid   = 0.5
+window.animate_constant = (name, range, mid, step = 0.04, rate = 40) ->
+  forwards = true
   min = mid - range
   max = mid + range
-  STEP = 0.03
-  mp = window.LINE_MIDPOINT
-  mp += STEP if forwards
-  mp -= STEP if not forwards
+  timeout_name = "_#{name}_aniamte_interval"
+  window[name + '_ORIGINAL'] = window[name]
+  set_next_constant = ->
+    STEP = step
+    mp = window[name]
+    mp += STEP if forwards
+    mp -= STEP if not forwards
 
-  if mp > max
-    mp = max
-    forwards = false
+    if mp > max
+      mp = max
+      forwards = false
 
-  if mp < min
-    mp = min
-    forwards = true
+    if mp < min
+      mp = min
+      forwards = true
 
-  window.LINE_MIDPOINT = mp
+    window[name] = mp
+  clearInterval window[timeout_name]
+  window[timeout_name] = setInterval(set_next_constant, rate)
 
-window.animateLines = ->
-  window.LINE_MIDPOINT_CHANGE = setInterval(change_midpoint, 40)
-
-window.dontAnimateLines = ->
-  clearInterval window.LINE_MIDPOINT_CHANGE
-  window.LINE_MIDPOINT = 0.5
+window.stop_animating = (name) ->
+  timeout_name = "_#{name}_aniamte_interval"
+  clearInterval window[timeout_name]
+  window[name] = window[name + '_ORIGINAL']

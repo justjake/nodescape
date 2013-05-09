@@ -112,3 +112,8 @@ render = ->
    
 # start render loop
 animate()
+
+# oh, and also animate CRAZYTUDE
+# (prop_name, range, mid, step = 0.04, rate = 40)
+window.animate_constant('CRAZYTUDE', 0.07, 0.01, 0.01)
+# window.animate_constant('LINE_MIDPOINT', 0.2, 0.5)
