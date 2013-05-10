@@ -32,12 +32,12 @@ exports.COOL      = 30617 # i forget the hex !
 
 exports.LINE_COLOR = exports.COOL
 exports.LINE_MIDPOINT = 0.5 # changing animates line coloration
+exports.LINE_WIDTH = 1
 
 # text setup
 exports.TEXT_SIZE = 7
 
 # edge setup
-exports.LINEWIDTH = 1
 
 exports.K = 1000
 
