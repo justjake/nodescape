@@ -157,9 +157,9 @@ class Node
 # right now just represented by a two-point line
 # TODO: allow for different line types
 class Edge
-    baseMaterial = new T.LineBasicMaterial(
+    baseMaterial = ->  new T.LineBasicMaterial(
         color: 0xffffff
-        linewidth: LINEWIDTH
+        linewidth: window.LINE_WIDTH
         linecap: "round"
         vertexColors: T.VertexColors
     )
@@ -293,7 +293,7 @@ class Edge
         @start = @from.mesh.position.clone()
         @end =  @to.mesh.position.clone()
         geo = @constructor.DrawLine(@start, @end)
-        @mesh = new T.Line(geo, baseMaterial)
+        @mesh = new T.Line(geo, baseMaterial())
 
     onRender: (scene) ->
         # TODO
@@ -302,7 +302,7 @@ class Edge
         @end.copy(@to.mesh.position)
         @start.copy(@from.mesh.position)
         geo = @constructor.DrawLine(@start, @end)
-        @mesh = new T.Line(geo, baseMaterial)
+        @mesh = new T.Line(geo, baseMaterial())
         scene.add(@mesh)
 
 
@@ -400,8 +400,27 @@ registration = (width,  mat) ->
     r = new T.Vector3(width, width / 2, 0)
     geo = new T.Geometry()
     geo.vertices.push t, b, l, r
-
     return new T.Line(geo, mat, T.LinePieces)
+
+grid = (w, h, spacing = 200, color, line_width) ->
+  mat = new T.LineBasicMaterial
+    color: color
+    linewidth: line_width
+  geo = new T.Geometry()
+  min_x = 0
+  max_x = w * spacing
+  min_y = 0
+  max_y = h * spacing
+  for x_r in [0..w]
+    x = x_r * spacing
+    geo.vertices.push(new T.Vector3(x, min_y, 0))
+    geo.vertices.push(new T.Vector3(x, max_y, 0))
+  for y_r in [0..h]
+    y = y_r * spacing
+    geo.vertices.push(new T.Vector3(min_x, y, 0))
+    geo.vertices.push(new T.Vector3(max_x, y, 0))
+  return new T.Line(geo, mat, T.LinePieces)
+
 
 reg_field = (min, max, spacing, size, color, txtify) ->
     group = new T.Object3D
@@ -452,5 +471,6 @@ Scape.Successor = Successor
 Scape.MouseCamera = MouseCamera
 Scape.registration = registration
 Scape.reg_field = reg_field
+Scape.grid = grid
 
 window.Scape = Scape
