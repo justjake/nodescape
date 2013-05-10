@@ -4,28 +4,21 @@
 ID = new Scape.Successor(0)
 
 #### Scene setup
-
-# control creation
-$container = $('#container')
 scene = new THREE.Scene()
-renderer = new THREE.WebGLRenderer
-    alpha: false
-    clearColor: 0x110000
-    antialias: false
-    clearApha: 1
-renderer.autoClear = false
-
 mouse_cam = new Scape.MouseCamera(VIEW_ANGLE, MAX_ZOOM, SNAP_DISTANCE)
 camera = window.camera = mouse_cam.camera
 
 #### Graph set-up
+
 # create node graph
 window.graph = new Scape.Graph(scene)
+
 # and add 1-10 nodes to it
 node_count = randomInRange(6, 20)
 edge_count = randomInRange(node_count, node_count * 2)
 for i in [0..node_count]
     graph.addNode(new Scape.Node(i, 'Example', [], {activity: 200 * Math.random()}))
+    
 # create some edges!
 for i in [0..edge_count]
     to = graph.nodes[ randomInRange(0, node_count) ]
@@ -34,14 +27,17 @@ for i in [0..edge_count]
     from = graph.nodes[ randomInRange(0, node_count) ] until from != to
     graph.addEdge(new Scape.Edge(i, to, from, [], {}))
 
+
+
 # create non-graph scene objects
 size = 900
 spacing = 80
 reg_red = Scape.reg_field(-1 * size, size, spacing, 10, ORANGERED, false)
 reg_oj = Scape.reg_field(-1 * size, size, spacing * 2, 10, ORANGE, true)
+bg = window.bg =  Scape.grid(30, 40, spacing, 0x220000, 1)
 light = new T.PointLight(0xFFFFFF)
 # add objs to scene so they can be displayed
-for obj in [light, camera, reg_red, reg_oj]
+for obj in [light, camera,bg, reg_red, reg_oj]
     scene.add(obj)
 
 
@@ -52,24 +48,39 @@ light.position.y = 0
 light.position.z = 500
 reg_oj.position.z = 50
 reg_red.position.z = -50
+bg.position.x = -1935
+bg.position.y = -895
+bg.position.z = -55
+# bg.rotation.x = 2 * Math.PI - (Math.PI / 4)
 
-# set up renderer
-renderer.setSize WIDTH, HEIGHT
-$container.append(renderer.domElement)
+
+
+
 
 #### Rendering effects
-pipeline = window.pipeline = {
-    render: new T.RenderPass(scene, camera)
-    # fxaa: new T.ShaderPass(T.FXAAShader)
-    bloom:  new T.BloomPass(0.9)
-    copy:   new T.ShaderPass(T.CopyShader)
-}
-# pipeline.fxaa.uniforms['resolution'].value.set(1/WIDTH, 1/HEIGHT)
-pipeline.copy.renderToScreen = true
+# set up renderer
+renderer = new THREE.WebGLRenderer(clearColor: 0x0e0000)
+# required for effects to function. (?) not well documented
+renderer.autoClear = false
 
+renderer.setSize(WIDTH, HEIGHT)
+$('#container').append(renderer.domElement)
+
+# composer, for our effect passes
 composer = window.composer = new T.EffectComposer(renderer)
-for pass in [pipeline.render,  pipeline.bloom, pipeline.copy]
-    composer.addPass(pass)
+composer.addPass(new T.RenderPass(scene, camera))
+
+# bloom effect
+# params: (strength = 1, kernelSize = 26, sigma = 4.0, resolution = 256)
+bloomEffect = new T.BloomPass(.9, 25, 4.0, 256)
+composer.addPass(bloomEffect)
+
+# copy - required for bloom (?) - no documentation
+copyEffect = new T.ShaderPass(T.CopyShader)
+composer.addPass(copyEffect)
+
+# last effect should render to screen
+composer.passes[composer.passes.length - 1].renderToScreen = true
 
 
 #### Event Handlers
