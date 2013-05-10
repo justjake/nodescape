@@ -8,10 +8,6 @@ exports = {}
 exports.WIDTH =  window.innerWidth
 exports.HEIGHT = window.innerHeight
 
-# THE BEST CONSTANT IN THE WORLD RIGHT HERE
-###########################################
-exports.CRAZYTUDE = 0.002
-###########################################
 
 # global camera control
 exports.MAX_ZOOM = 1700
@@ -24,15 +20,23 @@ exports.ASPECT = exports.WIDTH / exports.HEIGHT
 exports.NEAR = 0.1
 exports.FAR = 10000
 
+# graph
+exports.MOVEMENT_RATE = 9
+
 # colors
 exports.ORANGERED = 0x862104
 exports.ORANGE    = 0xe89206
 exports.CYAN      = 0x00ffff
 exports.COOL      = 30617 # i forget the hex !
 
+# Edges
 exports.LINE_COLOR = exports.COOL
 exports.LINE_MIDPOINT = 0.5 # changing animates line coloration
 exports.LINE_WIDTH = 1
+# THE BEST CONSTANT IN THE WORLD RIGHT HERE
+###########################################
+exports.CRAZYTUDE = 0.002
+###########################################
 
 # text setup
 exports.TEXT_SIZE = 7

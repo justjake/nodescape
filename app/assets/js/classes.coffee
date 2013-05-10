@@ -19,8 +19,6 @@ window.gaussian = gaussian = (a, b, c) -> (x) ->
 
 class Graph
 
-    RADIUS = 200
-    MOVEMENT_RATE = 3
     circle = (theta, r) ->
         return [r * Math.cos(theta), r * Math.sin(theta)]
 
@@ -30,11 +28,40 @@ class Graph
     count = (hash) ->
         Object.keys(hash).length
 
+
+    @RandomGraph = (scene, node_count, edge_count) ->
+      graph = new Graph(scene)
+      for i in [0..node_count]
+          graph.addNode(new Scape.Node(i, 'Example', [], {activity: 200 * Math.random()}))
+          
+      # create some edges!
+      for i in [0..edge_count]
+          to = graph.nodes[ randomInRange(0, node_count) ]
+          from = to
+          # choose different end point
+          from = graph.nodes[ randomInRange(0, node_count) ] until from != to
+          graph.addEdge(new Scape.Edge(i, to, from, [], {}))
+      return graph
+
     constructor: (@scene)  ->
         @nodes = {}
         @edges = {}
         @_cnodes = 0
         @_cedges = 0
+
+
+    # Tears down the graph by deleting all the edges then all the nodes
+    # also nullifies the onRender method by replacing it with a no-op
+    # function
+    destroy: ->
+      for id, _ of @edges
+        @deleteEdge(id)
+
+      for id, _ of @nodes
+        @deleteNode(id)
+
+      @onRender = (->)
+
 
     # Create/Update/Delete based on a JSON node data structure
     # node_data is a map[int]Object as defined in format.js

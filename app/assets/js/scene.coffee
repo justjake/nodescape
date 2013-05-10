@@ -11,21 +11,14 @@ camera = window.camera = mouse_cam.camera
 #### Graph set-up
 
 # create node graph
-window.graph = new Scape.Graph(scene)
+create_graph = ->
+  if window.graph?
+    window.graph.destroy()
+  node_count = randomInRange(6, 20)
+  edge_count = randomInRange(node_count, node_count * 2)
+  window.graph = Scape.Graph.RandomGraph(scene, node_count, edge_count)
 
-# and add 1-10 nodes to it
-node_count = randomInRange(6, 20)
-edge_count = randomInRange(node_count, node_count * 2)
-for i in [0..node_count]
-    graph.addNode(new Scape.Node(i, 'Example', [], {activity: 200 * Math.random()}))
-    
-# create some edges!
-for i in [0..edge_count]
-    to = graph.nodes[ randomInRange(0, node_count) ]
-    from = to
-    # choose different end point
-    from = graph.nodes[ randomInRange(0, node_count) ] until from != to
-    graph.addEdge(new Scape.Edge(i, to, from, [], {}))
+create_graph()
 
 
 
@@ -105,6 +98,10 @@ document.addEventListener("mousemove", ((evt) ->  mouse_cam.mouseMove(evt)), fal
 window.addEventListener("mousewheel", mouse_cam.boundMouseScroll, false)
 window.addEventListener("DOMMouseScroll", mouse_cam.boundMouseScroll, false)
 document.addEventListener("mousedown", ((evt) -> mouse_cam.onMouseDown(evt)), false)
+$(window).on 'keyup', (evt) ->
+  console.log('keypress', evt)
+  if evt.which == 49  # the '1' key
+    create_graph() # rebuild the graph with new params!
 
 animate = ->
     requestAnimationFrame(animate)
